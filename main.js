@@ -5,8 +5,7 @@ const app = http.createServer(function (request, response){
     const _url = request.url;
     const queryData = url.parse(_url, true).query;
     const title = queryData.id;
-    console.log(queryData.id);
-    console.log(_url);
+  
     if(_url == "/"){
         title = 'Welcome';
     }

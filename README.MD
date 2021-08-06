@@ -11,6 +11,7 @@
 const http = require("http"); // 노드 모듈을 가져온다
 const fs = require("fs");
 const url = require("url");
+
 const app = http.createServer(function (request, response) {
   const _url = request.url;
   const queryData = url.parse(_url, true).query;
@@ -54,7 +55,11 @@ const app = http.createServer(function (request, response) {
 app.listen(3000);
 ```
 
+-
 - http.createServer() ==> 서버 인스턴스를 만들어 반환
+  - const queryData = url.parse(\_url, true).query;
+    console.log(queryData.id);
+    - 결과 : HTML
   - response 객체의 매소드인 writeHead를 사용하여 타입을 결정
   - end 메소드를 이용하여 html 파일이나 html 소스를 보내 그 폼을 웹에서 출력!
 - app.listen(3000); ==> localhost 뒤에붙는 포트번호를 의미. 포트번호와 일치하지 않으면 사이트가 출력되지 않음
