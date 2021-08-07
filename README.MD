@@ -65,4 +65,146 @@ app.listen(3000);
 
 ---
 
-노드js12~
+파일읽기
+
+- fs.readFile 함수를 이용한다.
+
+```js
+fs.readFile(`data/${queryData.id}`, `utf-8`, function (err, description) {
+  const template = `
+       <!doctype html>
+       <html>
+       <head>
+        <title>WEB1 - ${title} </title>
+        <meta charset="utf-8">
+       </head>
+       <body>
+       <h1><a href="/">WEB</a></h1>
+       <ul>
+           <li><a href="/?id=HTML">HTML</a></li>
+           <li><a href="/?id=CSS">CSS</a></li>
+           <li><a href="/?id=JavaScript">JavaScript</a></li>
+       </ul>
+       <h2> ${title} </h2>
+       <p>${description}</p>
+       </body>
+       </html>
+       `;
+
+  response.end(template);
+});
+```
+
+- err은 익명함수로, 오류발생시 동작한다. description에 읽은 파일 데이터를 담아준다.
+- 클릭(HTML,CSS,JavaScript)을 통해 인자 값을 바꿔주면 해당 파일 데이터가 p태그안에 출력됨
+
+---
+
+```js
+if(queryData.id === undefined){
+
+            fs.readFile(`data/${queryData.id}`, `utf-8`, function(err, description){
+                const title = 'Welcome';
+                var description = 'hello, node JS'; // 이거 var로 한 이유는 hoisting을 위해서.. 원래 var쓰면 안되는데 계속 오류나서 어쩔 수 없이 var..
+                const template = `
+                <!doctype html>
+                <html>
+                <head>
+                 <title>WEB1 - ${title} </title>
+                 <meta charset="utf-8">
+                </head>
+                <body>
+                <h1><a href="/">WEB</a></h1>
+                <ul>
+                    <li><a href="/?id=HTML">HTML</a></li>
+                    <li><a href="/?id=CSS">CSS</a></li>
+                    <li><a href="/?id=JavaScript">JavaScript</a></li>
+                </ul>
+                <h2> ${title} </h2>
+                <p>${description}</p>
+                </body>
+                </html>
+                `;
+                response.writeHead(200);
+                response.end(template);
+             });
+```
+
+- 호이스팅(hoisting)
+
+  - 함수 안에 있는 선언들을 모두 끌어올려서 해당 함수 유효 범위의 최상단에 선언하는 것
+    - 자바스크립트 Parser가 함수 실행 전 해당 함수를 한번 훑음
+    - 함수 안에 존재하는 변수/함수 선언에 대한 정보를 기억하고 있다가 실행
+    - 유효 범위 : 함수블록 {} 안에서 유효
+  - 함수 내에서 아래쪽에 존재하는 내용 중 필요한 값들을 끌어올리는 것.
+
+    - 실제 메모리에서는 변화 없다.
+
+  - 호이스팅 대상 : var 변수 선언과 함수선언문에서만 호이스팅이 일어남.
+
+    - let, const와 함수 표현식에서는 호이스팅 발생하지 않음
+      - 호이스팅은 함수선언문과 함수 표현식에서 서로 다르게 동작하기 때문에 주의할 것.
+    - var 변수/함수의 선언만 끌어 올려지며, 할당은 끌어올려지지않음
+
+  - 함수 선언문에서의 호이스팅
+    - 코드를 구현한 위치와 관계없이 브라우저가 자바스크립트를 해석할 때 맨 위로 끌어올려짐
+  - 함수 표현식에서의 호이스팅
+    - 함수선운문과 달리 선언과 호출 순서에 따라서 정상적으로 함수가 실행되지 않을 수 있음.
+      - 함수표현식에서는 선언과 할당의 분리가 발생하기 때문.
+      - 함수표현식의 선언이 호출보다 아래에 있는경우 TypeError 발생
+
+  ```js
+  // 오류
+  function printName(firstName) {
+    // 함수 선언문
+    console.log(inner); // > "undefind" => 선언은 되어 있지만 값이 할당되지 않았다.
+    var result = inner(); // error
+    console.log("name is " + result);
+
+    var inner = function () {
+      // 함수 표현식
+      return "inner value";
+    };
+  }
+  printName(); // > TypeError : inner is not a function
+  ```
+
+  ```js
+  // js parser 내부의 호이스팅 결과
+  //오류
+  function printName(firstName) {
+    var inner; // 호이스팅 함수표현식의 변수값 선언
+    console.log(inner); // > "undefined"
+    var result = inner(); // error
+    console.log("name is " + result);
+    inner = function () {
+      return "inner value";
+    };
+  }
+  printName(); // > TypeError : inner is not a function
+  ```
+
+  - inner is not defined 오류 대신 inner is not a function 오류가 나온이유
+    - printName()이 실행되는 순간 호이스팅에 의해 inner는 undefined로 지정되기 때문이다.
+    - inner가 undefined라는 것은 아직 함수로 인식되지 않는다는 것을 의미.
+
+  ```js
+  // 오류
+  function printName(firstName) {
+    // 함수선언문
+    console.log(inner); // error  => inner에 대한 선언이 되어있지 않음
+    let result = inner();
+    console.log("name is" + result);
+    let inner = function () {
+      // 함수 표현식
+      return "inner value";
+    };
+  }
+  printName(); // > ReferenceError : inner is not defined
+  ```
+
+  - let, const => 호이스팅 일어나지않음
+
+- 코드의 가독성과 유지보수를 위해 호이스팅이 일어나지 않도록 유의. (let/const 사용 권장)
+
+node 20~
