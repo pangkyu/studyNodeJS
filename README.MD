@@ -207,4 +207,17 @@ if(queryData.id === undefined){
 
 - 코드의 가독성과 유지보수를 위해 호이스팅이 일어나지 않도록 유의. (let/const 사용 권장)
 
-node 20~
+---
+
+파일목록 알아내기
+
+```js
+const testFolder = "./data";
+const fs = require("fs");
+
+fs.readdir(testFolder, function (err, filelist) {
+  console.log(filelist); // 실행결과 : ['CSS', 'HTML', 'JavaScript'] => data폴더안에 있는 파일 목록들을 배열형태로 출력한다.
+});
+```
+
+21~
