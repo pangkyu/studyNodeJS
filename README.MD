@@ -220,4 +220,132 @@ fs.readdir(testFolder, function (err, filelist) {
 });
 ```
 
-21~
+---
+
+synchronous & asynchronous
+
+노드js는 비동기적 방식을 지원하며 싱글 스레드 기반으로 동작하는 서버. 또한 병렬처리를 쓰레드로 처리하지 않으므로 멀티스레드가 갖는 근원적인 문제에서 자유롭다.
+
+- 비동기 방식은 하나의 요청 처리가 완료되기 전에 제어권을 다음 요청으로 넘긴다.
+  - 따라서 I/O 처리의 경우 블로킹되지 않으며 다음 요청을 처리할 수 있는 상태가 된다
+- 병목현상을 해결하기 위해 사용한다.
+- IO 작업이 별로 없는 애플리케이션이나 단위작업이 짧은 메시지 앱의 경우 노드JS는 고성능을 보이나 처리작업이 CPU를 많이 소모하거나 대용량 파일을 처리하는 작업이라면 노드 대신 다른걸로 사용하는 것이 더좋음
+
+```js
+console.log("A");
+const result = fs.readFileSync("syntax/sample.txt", "utf-8"); // sample.txt에는 'B'가 입력되었음
+console.log(result);
+console.log("C");
+// 결과값 : A
+//    B
+//   C
+```
+
+```js
+console.log("A");
+fs.readFile("syntax/sample.txt", "utf-8", function (err, result) {
+  console.log(result); // 파일을 다 읽으면 실행됨(콜백)
+});
+console.log("C");
+// 결과값 : A
+//         C
+//          B
+```
+
+callback
+
+```js
+const a = function () {
+  console.log("a");
+};
+function slowFunc(callback) {
+  callback();
+}
+slowFunc(a); // 결과값 : a
+```
+
+---
+
+pm2
+
+- pm2 start 파일이름.js => 앱 실행
+- pm2 monit => 현재 pm2에 의해 실행되고 있는 프로그램 확인 (Q누르면 나가짐)
+- PM2 list => 현재 실행중인 프로세스 리스트
+- pm2 stop main => main을 종료
+- pm2 start 파일이름.js --watch => 파일 변경시 자동으로 반영한다.
+- pm2 log => 변경사항, 에러발생시 화면에 출력해준다.
+
+---
+
+post방식으로 전송된 데이터 받기
+
+```js
+      var body = '';
+      request.on('data', function(data){
+          body = body + data;
+      });
+      request.on('end', function(){
+      var post = qs.parse(body);
+      var title = post.title;
+      var description = post.description;
+      fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+         response.writeHead(302, {Location: `/?id=${qs.escape(title)}`});
+        response.end();
+       })
+```
+
+- 쿼리스트링 : 사용자가 웹으로 데이털르 전달하는 방법.
+  - parse() 함수를 이용하면 쿼리스트링을 객체로 변환하여 값을 반환
+
+---
+
+update
+
+```js
+   //1)
+       fs.readdir('./data', function(error, filelist){
+        fs.readFile(`data/${queryData.id}`, 'utf8', function(err, description){
+          var title = queryData.id;
+          var list = templateList(filelist);
+          var template = templateHTML(title, list,
+             `
+             <form action="/update_process" method="post">
+             <input type = "hidden" name = "id" value = "${title}">
+             <p><input type="text" name="title" placeholder="title" value = "${title}"></p>
+             <p>
+               <textarea name="description" placeholder="description">${description}</textarea>
+             </p>
+             <p>
+               <input type="submit">
+             </p>
+             </form>
+             `,
+             `<a href="/create">create</a> <a href = "/update?id=${title}">update</a>`);
+          response.writeHead(200);
+          response.end(template);
+```
+
+```js
+  //2)
+else if(pathname === '/update_process'){
+      var body = '';
+      request.on('data', function(data){
+        body = body + data;
+      });
+      request.on('end', function(){
+        var post = qs.parse(body);
+        var id = post.id;
+        var title = post.title;
+        var description = post.description;
+        fs.rename(`data/${id}`, `data/${title}`, function(error){
+          fs.writeFile(`data/${title}`, description, 'utf-8', function(error){
+            response.writeHead(302, {Location : `/?id = ${title}`});
+            response.end();
+          });
+        });
+      });
+    }
+```
+
+- 1)에서 <input type = "hidden" name = "id" value = "${title}"> 처럼 hidden값을 줘서 본래의 값을 수정하는 일이 없도록 만들어야함
+- id => 기존 값 title => 수정한 값 이 들어가게됨.
