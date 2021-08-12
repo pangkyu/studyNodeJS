@@ -349,3 +349,92 @@ else if(pathname === '/update_process'){
 
 - 1)에서 <input type = "hidden" name = "id" value = "${title}"> 처럼 hidden값을 줘서 본래의 값을 수정하는 일이 없도록 만들어야함
 - id => 기존 값 title => 수정한 값 이 들어가게됨.
+
+---
+
+delete 구현
+
+```js
+  //<a href = "/delete?id = ${title}">delete</a> 가 안되는 이유
+  // 링크를 클릭할 때 주소가 이동하게 됨. 해당 주소로 들어가면 삭제가 이루어진다.
+  <form action = "delete_process" method = "post"> // onsubmit = "javascript.js" 를 이용하면 바로 삭제하지않게 처리할 수 있다.
+    <input type = "hidden" name = "id" value = "${title}">
+    <input type = "submit" value = "delete" >
+  </form>
+```
+
+```js
+     else if(pathname === '/delete_process'){
+      var body = '';
+      request.on('data', function(data){
+        body = body + data;
+      });
+      request.on('end', function(){
+        var post = qs.parse(body);
+        var id = post.id;
+        fs.unlink(`data/${id}`, function(error){ // 파일이나 심볼릭링크를 삭제함
+          response.writeHead(302, {Location: `/`}); // 302 : 페이지를 이동시키라는 명령어
+          response.end();
+        });
+      });
+    }
+```
+
+---
+
+모듈
+
+```js
+module.exports = {
+  // or var template = { code ... }  module.exports = template; 해도 결과 같음
+  HTML: function (title, list, body, control) {
+    return `
+      <!doctype html>
+      <html>
+      <head>
+        <title>WEB1 - ${title}</title>
+        <meta charset="utf-8">
+      </head>
+      <body>
+        <h1><a href="/">WEB</a></h1>
+        ${list}
+        ${control}
+        ${body}
+      </body>
+      </html>
+      `;
+  },
+  list: function (filelist) {
+    var list = "<ul>";
+    var i = 0;
+    while (i < filelist.length) {
+      list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
+      i = i + 1;
+    }
+    list = list + "</ul>";
+    return list;
+  },
+};
+```
+
+- 그리고 모듈을 사용할 부분에서 require('파일경로'); 로 불러오면 된다.
+
+---
+
+입출력정보에 대한 보안
+
+```js
+var filteredId = path.parse(queryData.id).base;
+fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
+```
+
+```js
+ var filteredId = path.parse(id).base;
+ fs.unlink(`data/${filteredId}`, function(error){
+```
+
+- 웹브라우저에서 경로를 통해 접속하여 개인정보를 열람할 수 있기 때문에 위의 코드처럼 필터링을 씌워주어야하고 추가적으로 보안을 강화시켜야함.
+
+script태그와 같이 브라우저가 해석하여 자동적으로 실행되게 된다면 로그유출 등과 같은 개인정보가 유출될 위험이 있다.
+
+node 47.3~

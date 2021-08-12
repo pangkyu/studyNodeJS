@@ -1,0 +1,25 @@
+{
+  "name": "studynodejs",
+  "version": "1.0.0",
+  "description": "목표 : NODE JS를 이용하여 웹과 데이터베이스 연동시키기",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pangkyu/studyNodeJS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pangkyu/studyNodeJS/issues"
+  },
+  "homepage": "https://github.com/pangkyu/studyNodeJS#readme",
+  "dependencies": {
+    "sanitize-html": "^2.4.0"
+  }
+}
