@@ -456,3 +456,90 @@ clean = sanitizeHtml(dirty, {
 ```
 
 - 위와 같은 코드로 예외 태그를 설정할 수 있다.
+
+---
+
+sql 연결
+
+```js
+var mysql = require("mysql");
+var connection = mysql.createConnection({
+  host: "localhost",
+  user: "아이디",
+  password: "비밀번호",
+  database: "실행할 데이터베이스",
+});
+connection.connect();
+connection.query("select * from topic", function (error, results, fields) {
+  if (error) throw error;
+  console.log(results);
+});
+connection.end();
+```
+
+- mysql로 홈페이지 구현
+
+```js
+// main.js
+if (queryData.id === undefined) {
+  db.query(`select * from topic`, function (error, topics) {
+    var title = "Welcome";
+    var description = "Hello, Node.js";
+    var list = template.list(topics);
+    var html = template.HTML(
+      title,
+      list,
+      `<h2>${title}</h2>${description}`,
+      `<a href="/create">create</a>`
+    );
+    response.writeHead(200);
+    response.end(html);
+  });
+} else {
+  db.query(`select * from topic`, function (error, topics) {
+    if (error) {
+      throw error;
+    }
+    db.query(
+      `select * from topic where id = ? `,
+      [queryData.id],
+      function (error2, topic) {
+        if (error2) {
+          throw error2;
+        }
+        var title = topic[0].title;
+        var description = topic[0].description;
+        var list = template.list(topics);
+        var html = template.HTML(
+          title,
+          list,
+          `<h2>${title}</h2>${description}`,
+          `<a href="/create">create</a>
+              <a href="/update?id=${queryData.id}">update</a>
+              <form action="delete_process" method="post">
+                <input type="hidden" name="id" value="${queryData.id}">
+                <input type="submit" value="delete">
+              </form>`
+        );
+        response.writeHead(200);
+        response.end(html);
+      }
+    );
+  });
+}
+```
+
+```js
+ // template.js
+,list:function(topics){
+      var list = '<ul>';
+      var i = 0;
+      while(i < topics.length){
+        list = list + `<li><a href="/?id=${topics[i].id}">${topics[i].title}</a></li>`;
+        i = i + 1;
+      }
+      list = list+'</ul>';
+      return list;
+```
+
+- topic 테이블의 길이만큼의 id와 title정보를 받아와서 href 값에 적용시켜준다.
