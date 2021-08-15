@@ -437,4 +437,22 @@ fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
 
 script태그와 같이 브라우저가 해석하여 자동적으로 실행되게 된다면 로그유출 등과 같은 개인정보가 유출될 위험이 있다.
 
-node 47.3~
+- sanitize 라이브러리를 이용하면 스크립트구문처럼 프로그램에 영향이 갈 수 있는 부분을 없앨 수 있다.
+
+```js
+var sanitizeHtml = require("sanitize-html");
+var dirty = "some really tacky HTML";
+var clean = sanitizeHtml(dirty);
+```
+
+```js
+clean = sanitizeHtml(dirty, {
+  allowedTags: ["b", "i"],
+  allowedAttributes: {
+    a: ["href"],
+  },
+  allowedIframeHostnames: ["www.youtube.com"],
+});
+```
+
+- 위와 같은 코드로 예외 태그를 설정할 수 있다.
