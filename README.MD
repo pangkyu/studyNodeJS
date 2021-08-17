@@ -543,3 +543,69 @@ if (queryData.id === undefined) {
 ```
 
 - topic 테이블의 길이만큼의 id와 title정보를 받아와서 href 값에 적용시켜준다.
+
+---
+
+mysql로 글생성 기능 구현
+
+```js
+  else if(pathname === '/create_process'){
+    var body = '';
+    request.on('data', function(data){
+        body = body + data;
+    });
+    request.on('end', function(){
+        var post = qs.parse(body);
+        db.query(`
+          INSERT INTO topic (title, description, created, author_id)
+            VALUES(?, ?, NOW(), ?)`,
+          [post.title, post.description, post.author],
+          function(error, result){
+            if(error){
+              throw error;
+            }
+            response.writeHead(302, {Location: `/?id=${result.insertId}`});
+            response.end();
+          }
+        )
+    });
+```
+
+- now()는 mysql 내장함수.
+- 글 수정할 때 selected 넣는 방법
+
+```js
+  `
+            <form action="/update_process" method="post">
+              <input type="hidden" name="id" value="${topic[0].id}">
+              <p><input type="text" name="title" placeholder="title" value="${topic[0].title}"></p>
+              <p>
+                <textarea name="description" placeholder="description">${topic[0].description}</textarea>
+              </p>
+              <p>
+                ${template.authorSelect(authors, topic[0].author_id)}
+              </p>
+              <p>
+                <input type="submit">
+              </p>
+            </form>
+            `,
+```
+
+```js
+authorSelect:function(authors, author_id){
+    var tag = '';
+    var i = 0;
+    while(i < authors.length){
+      var selected = '';
+      if(authors[i].id === author_id){
+        selected = ' selected'; // selected 문자열을 밑에 붙여넣음
+      }
+      tag += `<option value="${authors[i].id}"${selected}>${authors[i].name}</option>`;
+      i++;
+    }
+    return `
+      <select name="author">
+        ${tag}
+      </select>
+```
